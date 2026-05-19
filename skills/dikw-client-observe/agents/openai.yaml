@@ -1,0 +1,4 @@
+interface:
+  display_name: "DIKW Observe"
+  short_description: "Inspect DIKW server health and providers."
+  default_prompt: "Use $dikw-client-observe to check the health and provider status of my dikw server."

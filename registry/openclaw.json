@@ -1,0 +1,12 @@
+{
+  "name": "dikw-skills",
+  "version": "0.1.0",
+  "plugin": "./plugins/dikw-skills",
+  "skills": [
+    "dikw-client-observe",
+    "dikw-client-retrieve",
+    "dikw-client-import",
+    "dikw-client-curate",
+    "dikw-client-utils"
+  ]
+}

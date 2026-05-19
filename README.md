@@ -1,0 +1,91 @@
+# DIKW Skills
+
+Agent Skills and local plugin packaging for `dikw client *` workflows.
+
+This repository treats `skills/` as the canonical source and packages those
+skills for Codex, Claude Code, OpenClaw, and Hermes-compatible discovery flows.
+The skills help agents use a running `dikw-core` client safely for observation,
+retrieval, import, curation, and task utilities.
+
+## Features
+
+- Document the `dikw client` command surface as focused agent skills.
+- Keep `dikw init`, `dikw serve`, and `dikw auth` as prerequisites, not skill triggers.
+- Package canonical skills into the `plugins/dikw-skills/` local plugin wrapper.
+- Generate individual skill archives, a plugin archive, registry indexes, and checksums.
+- Validate command ownership, skill frontmatter, plugin sync, and release artifacts.
+
+## Repository Layout
+
+| Path | Purpose |
+|---|---|
+| `skills/` | Source-of-truth skill folders with `SKILL.md`. |
+| `references/` | Shared DIKW client command references used by the skills. |
+| `plugins/dikw-skills/` | Local plugin wrapper for Codex, Claude Code, and OpenClaw. |
+| `.agents/plugins/marketplace.json` | Codex local marketplace entry. |
+| `src/dikw_skills/` | Validation, plugin sync, registry, and release build tooling. |
+| `registry/` | OpenClaw and Hermes publication metadata. |
+| `dist/` | Generated release artifacts, ignored by Git. |
+
+Generated plugin skill copies under `plugins/dikw-skills/skills/` are synced
+from the canonical `skills/` directory and should not be maintained by hand.
+
+## Skill Catalog
+
+| Skill | Purpose |
+|---|---|
+| `dikw-client-observe` | Inspect server/base/provider state with read-only client checks. |
+| `dikw-client-retrieve` | Retrieve chunks, read pages, walk graph links, and fetch assets. |
+| `dikw-client-import` | Pre-flight and import local source material, including converter-backed formats. |
+| `dikw-client-curate` | Refresh indexes, synthesize K-layer pages, distill/review W-layer items, lint, and eval. |
+| `dikw-client-utils` | Handle async task lifecycle and `serve-and-run` one-shot workflows. |
+
+## Prerequisites
+
+Install `dikw-core` from PyPI to provide the `dikw` CLI:
+
+```bash
+uv tool install dikw-core
+```
+
+Optional import converters can be installed when the agent needs non-Markdown
+inputs:
+
+```bash
+uv tool install dikw-converter-mineru
+uv tool install dikw-converter-epub
+```
+
+All listed PyPI packages require Python `>=3.12`.
+
+## Development
+
+Run the quality baseline:
+
+```bash
+uv run dikw-skills-validate
+uv run dikw-skills-sync-plugin --check
+uv run python -m unittest discover -s tests
+uv run dikw-skills-build
+```
+
+Without `uv`, set `PYTHONPATH=src` and run the modules directly with Python
+3.12+.
+
+## Distribution
+
+Build release artifacts locally:
+
+```bash
+uv run dikw-skills-build
+```
+
+Artifacts are written under `dist/`:
+
+| Path | Contents |
+|---|---|
+| `dist/skills/*.zip` | Individual skill archives. |
+| `dist/plugins/dikw-skills-plugin.zip` | Plugin wrapper archive. |
+| `dist/site/.well-known/skills/index.json` | Skills discovery index. |
+| `dist/site/.well-known/agent-skills/index.json` | Agent Skills discovery index. |
+| `dist/checksums.txt` | SHA-256 checksums. |

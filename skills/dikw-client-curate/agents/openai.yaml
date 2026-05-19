@@ -1,0 +1,4 @@
+interface:
+  display_name: "DIKW Curate"
+  short_description: "Ingest, synthesize, lint, review, and eval DIKW bases."
+  default_prompt: "Use $dikw-client-curate to refresh and curate my dikw knowledge base."

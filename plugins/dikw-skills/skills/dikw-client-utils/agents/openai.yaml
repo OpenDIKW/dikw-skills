@@ -1,0 +1,4 @@
+interface:
+  display_name: "DIKW Utils"
+  short_description: "Manage DIKW tasks and serve-and-run utilities."
+  default_prompt: "Use $dikw-client-utils to wait for or inspect a dikw client task."

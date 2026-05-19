@@ -1,0 +1,4 @@
+interface:
+  display_name: "DIKW Import"
+  short_description: "Import Markdown and converter-backed files."
+  default_prompt: "Use $dikw-client-import to import local source files into my dikw base."

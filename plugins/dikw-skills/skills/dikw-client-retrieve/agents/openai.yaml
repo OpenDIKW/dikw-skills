@@ -1,0 +1,4 @@
+interface:
+  display_name: "DIKW Retrieve"
+  short_description: "Retrieve DIKW chunks, pages, graph links, and assets."
+  default_prompt: "Use $dikw-client-retrieve to retrieve grounded context from my dikw knowledge base."
