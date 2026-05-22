@@ -57,14 +57,16 @@ for the human-readable summary.
 ## After Import
 
 After successful import, use `dikw-client-curate` to refresh the searchable
-index:
+index. The agent-friendly default is async:
 
 ```bash
-dikw client ingest --wait --plain
-dikw client ingest --no-embed --wait --plain
+dikw client ingest
+dikw client ingest --no-embed
 ```
 
-Do not treat import as indexing. It commits well-formed packages into
+Capture the returned `task_id` and follow it with `dikw-client-utils`. Use
+`--wait --plain` only when the user asks for the ingest report in the current
+command. Do not treat import as indexing. It commits well-formed packages into
 `sources/`; `ingest` chunks and optionally embeds them.
 
 ## Failure Handling

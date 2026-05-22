@@ -73,7 +73,7 @@ pip install dikw-converter-mineru    # engine "mineru": .pdf/.docx/.pptx/.xlsx
 pip install dikw-converter-epub      # engine "epub": .epub
 
 # If dikw-core is an isolated tool, inject into that env instead:
-uv tool install dikw-core --with dikw-converter-mineru   # uv
+uv tool install "dikw-core[cjk]" --with dikw-converter-mineru   # uv
 pipx inject dikw-core dikw-converter-mineru              # pipx
 ```
 

@@ -9,50 +9,54 @@ Use this skill for operations that refresh indexes, write generated knowledge,
 call configured LLM/provider legs, or approve/reject wisdom candidates. Confirm
 intent before applying fixes or approving/rejecting review items.
 
-## Async vs Blocking
+## Agent Default
 
 Long-running mutating commands default to async and print a JSON task handle.
-Prefer the async path when an agent can poll or resume later:
+Use that path first so the agent can poll, resume, cancel, or hand off:
 
 ```bash
 dikw client ingest
 dikw client synth
+dikw client distill
+dikw client eval
 dikw client lint propose --limit 10
+dikw client lint apply <proposal_task_id> --pick 0,2
 ```
 
-Then use `dikw-client-utils` (`tasks events`, `tasks status`, `tasks wait`, or
-`tasks cancel`) to follow the task. Use `--wait --plain` only when the user
-expects this command invocation to block until a final report is available.
+Capture `task_id` from stdout, then use `dikw-client-utils` (`tasks events`,
+`tasks status`, `tasks wait`, or `tasks cancel`) to follow the task. Use
+blocking shortcuts only when the user explicitly wants this invocation to wait
+for the final report.
 
 ## Index Refresh
 
 Run ingest after users add or import sources:
 
 ```bash
-dikw client ingest --wait --plain
-dikw client ingest --no-embed --wait --plain
-dikw client ingest --strict --plain
+dikw client ingest
+dikw client ingest --no-embed
 ```
 
 - Use `--no-embed` for FTS-only refreshes without embedding API calls.
-- Use `--strict` when any per-file error should fail the run; it implies wait.
-- For async task follow-up, use `dikw-client-utils`.
+- Use `dikw client ingest --strict --plain` only when any per-file error should
+  fail the run immediately; `--strict` implies waiting for completion.
+- For task follow-up, use `dikw-client-utils`.
 
 ## Knowledge and Wisdom Production
 
 Generate K-layer wiki pages:
 
 ```bash
-dikw client synth --wait --plain
-dikw client synth --all --wait --plain
-dikw client synth --no-embed --wait --plain
+dikw client synth
+dikw client synth --all
+dikw client synth --no-embed
 ```
 
 Distill W-layer candidates:
 
 ```bash
-dikw client distill --wait --plain
-dikw client distill --batch 8 --wait --plain
+dikw client distill
+dikw client distill --batch 8
 ```
 
 Review wisdom candidates:
@@ -79,16 +83,16 @@ dikw client lint
 Propose fixes:
 
 ```bash
-dikw client lint propose --limit 10 --wait --plain
-dikw client lint propose --rule broken_wikilink --wait --plain
+dikw client lint propose --limit 10
+dikw client lint propose --rule broken_wikilink
 dikw client lint proposals
 ```
 
 Apply selected fixes only after inspecting proposals:
 
 ```bash
-dikw client lint apply <proposal_task_id> --pick 0,2 --wait --plain
-dikw client lint apply <proposal_task_id> --skip 1 --wait --plain
+dikw client lint apply <proposal_task_id> --pick 0,2
+dikw client lint apply <proposal_task_id> --skip 1
 ```
 
 Use `--enable-llm` only when the user accepts token cost for fixer fallback
@@ -99,22 +103,34 @@ paths.
 Run evals on the server:
 
 ```bash
-dikw client eval --wait --plain
-dikw client eval --dataset mvp --retrieval hybrid --wait --plain
-dikw client eval --eval retrieval --wait --plain
-dikw client eval --eval synth --judge --judge-sample 5 --wait --plain
+dikw client eval
+dikw client eval --dataset mvp --retrieval hybrid
+dikw client eval --eval retrieval
+dikw client eval --eval synth --judge --judge-sample 5
 ```
 
-By default eval emits NDJSON-style report lines unless `--pretty` is used.
-Treat exit `1` as task/gate failure and exit `2` on explicit synth eval with no
-declared synth threshold gate.
+Default non-wait eval output is a task handle. For blocking eval reports,
+`--pretty` changes report rendering; exit `1` means task/gate failure and exit
+`2` means explicit synth eval had no declared synth threshold gate.
+
+## Blocking Shortcuts
+
+Use `--wait --plain` for short tasks or when the user explicitly asks for the
+final report in the current command:
+
+```bash
+dikw client ingest --wait --plain
+dikw client synth --wait --plain
+dikw client lint propose --limit 10 --wait --plain
+dikw client lint apply <proposal_task_id> --pick 0,2 --wait --plain
+dikw client eval --dataset mvp --eval retrieval --wait --plain
+```
 
 ## Safety Rules
 
-- Prefer `--wait --plain` when the user expects a final report.
+- Prefer async submit plus `dikw-client-utils` for long-running tasks.
 - Do not apply lint proposals, approve wisdom, or reject wisdom without an
   explicit user decision.
 - Mention possible provider/LLM/embedding cost before `synth`, `distill`,
   `eval --judge`, or `lint propose --enable-llm`.
-- For async task handles, waiting, events, cancellation, and exit codes, use
-  the `dikw-client-utils` skill.
+- Use `--wait --plain` only for bounded tasks or explicit synchronous requests.
