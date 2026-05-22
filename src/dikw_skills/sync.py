@@ -1,4 +1,4 @@
-"""Sync canonical skills and shared references into the plugin wrapper."""
+"""Sync canonical skills into the plugin wrapper."""
 
 from __future__ import annotations
 
@@ -30,8 +30,6 @@ def sync_plugin(root: str | Path) -> None:
     plugin_root = root / PLUGIN_DIR
     plugin_root.mkdir(parents=True, exist_ok=True)
     _copy_tree(root / "skills", plugin_root / "skills")
-    if (root / "references").exists():
-        _copy_tree(root / "references", plugin_root / "references")
 
 
 def _same_tree(src: Path, dst: Path) -> list[str]:
@@ -60,6 +58,4 @@ def check_sync(root: str | Path) -> SyncResult:
             errors.append(f"missing canonical skill: {src}")
             continue
         errors.extend(_same_tree(src, dst))
-    if (root / "references").exists():
-        errors.extend(_same_tree(root / "references", plugin_root / "references"))
     return SyncResult(errors)

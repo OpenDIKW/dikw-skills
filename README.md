@@ -19,10 +19,10 @@ retrieval, import, curation, and task utilities.
 
 | Path | Purpose |
 |---|---|
-| `skills/` | Source-of-truth skill folders with `SKILL.md`. |
-| `references/` | Shared DIKW client command references used by the skills. |
+| `skills/` | Source-of-truth skill folders with `SKILL.md` (self-contained — no external references). |
 | `plugins/dikw-skills/` | Local plugin wrapper for Codex, Claude Code, and OpenClaw. |
 | `.agents/plugins/marketplace.json` | Codex local marketplace entry. |
+| `.claude-plugin/marketplace.json` | Claude Code marketplace entry (plugin manifest lives at `plugins/dikw-skills/.claude-plugin/plugin.json`). |
 | `src/dikw_skills/` | Validation, plugin sync, registry, and release build tooling. |
 | `registry/` | OpenClaw and Hermes publication metadata. |
 | `dist/` | Generated release artifacts, ignored by Git. |
@@ -40,20 +40,41 @@ from the canonical `skills/` directory and should not be maintained by hand.
 | `dikw-client-curate` | Refresh indexes, synthesize K-layer pages, distill/review W-layer items, lint, and eval. |
 | `dikw-client-utils` | Handle async task lifecycle and `serve-and-run` one-shot workflows. |
 
-## Prerequisites
+## Install in Claude Code
 
-Install `dikw-core` from PyPI to provide the `dikw` CLI:
+These skills ship as a Claude Code plugin. Add the marketplace, then install:
 
-```bash
-uv tool install dikw-core
+```text
+/plugin marketplace add OpenDIKW/dikw-skills
+/plugin install dikw-skills@opendikw
 ```
 
-Optional import converters can be installed when the agent needs non-Markdown
-inputs:
+The five skills then appear namespaced as `dikw-skills:dikw-client-*`. (For
+Codex, use the `.agents/plugins/marketplace.json` entry; OpenClaw/Hermes consume
+the indexes under `registry/`.)
+
+## Prerequisites
+
+Install `dikw-core` from PyPI to provide the `dikw` CLI. Any installer works
+(use the `cjk` extra by default so Chinese/CJK bases have the tokenizer):
 
 ```bash
-uv tool install dikw-converter-mineru
-uv tool install dikw-converter-epub
+pip install "dikw-core[cjk]"          # into the active venv (simplest)
+pipx install "dikw-core[cjk]"         # isolated, on PATH
+uv tool install "dikw-core[cjk]"      # isolated, on PATH (uv users)
+```
+
+Converters are plugins `dikw client` discovers in-process, so install them into
+the **same environment as `dikw-core`**, only when importing non-Markdown inputs:
+
+```bash
+# Same venv as dikw-core:
+pip install dikw-converter-mineru    # engine "mineru": .pdf/.docx/.pptx/.xlsx
+pip install dikw-converter-epub      # engine "epub": .epub
+
+# If dikw-core is an isolated tool, inject into that env instead:
+uv tool install "dikw-core[cjk]" --with dikw-converter-mineru   # uv
+pipx inject dikw-core dikw-converter-mineru              # pipx
 ```
 
 All listed PyPI packages require Python `>=3.12`.

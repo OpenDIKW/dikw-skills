@@ -1,0 +1,15 @@
+{
+  "name": "dikw-skills",
+  "displayName": "DIKW Skills",
+  "description": "Agent skills for using dikw client commands and SOP workflows.",
+  "version": "0.1.0",
+  "author": {
+    "name": "OpenDIKW contributors",
+    "url": "https://github.com/OpenDIKW"
+  },
+  "homepage": "https://github.com/OpenDIKW/dikw-skills",
+  "repository": "https://github.com/OpenDIKW/dikw-skills",
+  "license": "MIT",
+  "keywords": ["dikw", "agent-skills", "knowledge-base", "rag"],
+  "skills": "./skills/"
+}

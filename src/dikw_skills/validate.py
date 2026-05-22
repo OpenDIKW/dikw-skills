@@ -96,5 +96,41 @@ def validate_repo(root: str | Path) -> ValidationResult:
             elif matching[0].get("source", {}).get("path") != "./plugins/dikw-skills":
                 errors.append("marketplace path must be './plugins/dikw-skills'")
 
+    # Claude Code packaging: its manifest lives beside the Codex one in the
+    # plugin dir, and its marketplace sits at the repo root. The schema
+    # differs from Codex's — a Claude Code marketplace entry carries
+    # ``source`` as a plain relative-path string, not a nested object.
+    cc_plugin_json = root / PLUGIN_DIR / ".claude-plugin" / "plugin.json"
+    if not cc_plugin_json.exists():
+        errors.append("claude-plugin manifest missing")
+    else:
+        try:
+            cc_plugin = json.loads(cc_plugin_json.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            errors.append(f"claude-plugin manifest invalid JSON: {exc}")
+        else:
+            if cc_plugin.get("name") != PLUGIN_NAME:
+                errors.append(f"claude-plugin manifest name must be {PLUGIN_NAME!r}")
+            if cc_plugin.get("skills") != "./skills/":
+                errors.append("claude-plugin manifest skills path must be './skills/'")
+
+    cc_marketplace = root / ".claude-plugin" / "marketplace.json"
+    if not cc_marketplace.exists():
+        errors.append("claude-plugin marketplace.json missing")
+    else:
+        try:
+            cc_data = json.loads(cc_marketplace.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            errors.append(f"claude-plugin marketplace.json invalid JSON: {exc}")
+        else:
+            cc_entries = cc_data.get("plugins", [])
+            cc_matching = [e for e in cc_entries if e.get("name") == PLUGIN_NAME]
+            if not cc_matching:
+                errors.append("claude-plugin marketplace entry for dikw-skills missing")
+            elif cc_matching[0].get("source") != "./plugins/dikw-skills":
+                errors.append(
+                    "claude-plugin marketplace source must be './plugins/dikw-skills'"
+                )
+
     errors.extend(check_sync(root).errors)
     return ValidationResult(errors)
