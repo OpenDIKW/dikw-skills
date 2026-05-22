@@ -19,8 +19,7 @@ retrieval, import, curation, and task utilities.
 
 | Path | Purpose |
 |---|---|
-| `skills/` | Source-of-truth skill folders with `SKILL.md`. |
-| `references/` | Shared DIKW client command references used by the skills. |
+| `skills/` | Source-of-truth skill folders with `SKILL.md` (self-contained — no external references). |
 | `plugins/dikw-skills/` | Local plugin wrapper for Codex, Claude Code, and OpenClaw. |
 | `.agents/plugins/marketplace.json` | Codex local marketplace entry. |
 | `.claude-plugin/marketplace.json` | Claude Code marketplace entry (plugin manifest lives at `plugins/dikw-skills/.claude-plugin/plugin.json`). |
@@ -56,12 +55,13 @@ the indexes under `registry/`.)
 
 ## Prerequisites
 
-Install `dikw-core` from PyPI to provide the `dikw` CLI. Any installer works:
+Install `dikw-core` from PyPI to provide the `dikw` CLI. Any installer works
+(use the `cjk` extra by default so Chinese/CJK bases have the tokenizer):
 
 ```bash
-pip install dikw-core          # into the active venv (simplest)
-pipx install dikw-core         # isolated, on PATH
-uv tool install dikw-core      # isolated, on PATH (uv users)
+pip install "dikw-core[cjk]"          # into the active venv (simplest)
+pipx install "dikw-core[cjk]"         # isolated, on PATH
+uv tool install "dikw-core[cjk]"      # isolated, on PATH (uv users)
 ```
 
 Converters are plugins `dikw client` discovers in-process, so install them into

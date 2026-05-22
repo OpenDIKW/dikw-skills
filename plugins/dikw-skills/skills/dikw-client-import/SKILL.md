@@ -11,8 +11,9 @@ commands later to index them.
 
 ## Prerequisites
 
-`dikw-core` must be installed from PyPI and provide the `dikw` CLI
-(`pip install dikw-core`, or `pipx`/`uv tool` if you prefer an isolated tool).
+`dikw-core` must be installed from PyPI and provide the `dikw` CLI. Install
+the CJK extra by default for Chinese/CJK bases (`pip install
+"dikw-core[cjk]"`, or `pipx`/`uv tool` if you prefer an isolated tool).
 
 Converters are plugins `dikw client` discovers **in-process**, so install them
 into the **same environment as `dikw-core`** — only when actually needed:
@@ -23,7 +24,7 @@ pip install dikw-converter-mineru     # engine "mineru": .pdf/.docx/.pptx/.xlsx
 pip install dikw-converter-epub       # engine "epub": .epub
 
 # If dikw-core is an isolated tool, inject into that env instead:
-uv tool install dikw-core --with dikw-converter-mineru   # uv
+uv tool install "dikw-core[cjk]" --with dikw-converter-mineru   # uv
 pipx inject dikw-core dikw-converter-mineru              # pipx
 ```
 

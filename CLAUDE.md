@@ -17,8 +17,8 @@ uv run dikw-skills-sync-plugin --check   # fail if plugin copies are stale
 uv run python -m unittest discover -s tests
 uv run dikw-skills-build             # write release artifacts to dist/
 
-# Regenerate the plugin wrapper after editing skills/ or references/
-uv run dikw-skills-sync-plugin       # copies skills/ + references/ into plugins/dikw-skills/
+# Regenerate the plugin wrapper after editing skills/
+uv run dikw-skills-sync-plugin       # copies skills/ into plugins/dikw-skills/
 
 # Run a single test
 uv run python -m unittest tests.test_sync_and_build.SyncAndBuildTests.test_build_creates_expected_release_artifacts
@@ -32,7 +32,7 @@ The Python package in `src/dikw_skills/` is built around one central contract:
 
 - **`catalog.py`** — `EXPECTED_SKILLS` maps each skill name to the exact `dikw client` subcommands it owns. This is the single source of truth that every other module consults. Every command appears under exactly one skill (ownership is non-overlapping, enforced by `validate`).
 - **`validate.py`** — checks each `skills/<name>/SKILL.md` exists, has `name`/`description` frontmatter, and literally contains the string `dikw client <command>` for every command in its catalog entry; checks for duplicate command ownership; validates the Codex `plugin.json` and `.agents/plugins/marketplace.json` shapes; then folds in `check_sync`.
-- **`sync.py`** — `sync_plugin` mirrors `skills/` and `references/` into `plugins/dikw-skills/`; `check_sync` does a byte-level comparison (`filecmp.cmp(shallow=False)`) and reports stale or missing copies. The plugin copies are generated artifacts — **never hand-edit `plugins/dikw-skills/skills/` or `plugins/dikw-skills/references/`**; edit the canonical sources and re-sync.
+- **`sync.py`** — `sync_plugin` mirrors `skills/` into `plugins/dikw-skills/`; `check_sync` does a byte-level comparison (`filecmp.cmp(shallow=False)`) and reports stale or missing copies. The plugin copies are generated artifacts — **never hand-edit `plugins/dikw-skills/skills/`**; edit the canonical sources and re-sync.
 - **`build.py`** — runs `sync_plugin` first, then produces per-skill zips, the plugin zip, two identical discovery indexes (`.well-known/skills/` and `.well-known/agent-skills/`), and a `checksums.txt`. `_safe_output_dir` refuses to build into the repo root, a parent, or any source directory — preserve this guard when changing build paths.
 
 Data flow: **edit `skills/` → `sync_plugin` mirrors to plugin wrapper → `build_dist` packages everything into `dist/`.** `validate` and `--check` exist to catch drift between these stages in CI.
@@ -43,9 +43,9 @@ Each skill lives in `skills/<name>/` with:
 - `SKILL.md` — YAML frontmatter (`name` must equal the directory name; `description` required) followed by the agent-facing SOP. Body must mention each owned `dikw client <command>` verbatim or validation fails.
 - `agents/openai.yaml` — Codex/OpenAI interface metadata (display name, default prompt).
 
-When **adding or renaming a skill or command**: update `EXPECTED_SKILLS` in `catalog.py`, the ownership table in `references/dikw-client-command-reference.md`, the `SKILL.md`, then run `sync-plugin` and the full baseline. The expected-artifact set in `tests/test_sync_and_build.py` is hard-coded per skill — update it too.
+When **adding or renaming a skill or command**: update `EXPECTED_SKILLS` in `catalog.py`, the `SKILL.md`, then run `sync-plugin` and the full baseline. The expected-artifact set in `tests/test_sync_and_build.py` is hard-coded per skill — update it too.
 
 ### Scope boundaries baked into the skills
 
-- Only `dikw client *` commands are in scope. Root commands (`dikw init`, `dikw serve`, `dikw auth`) are setup *prerequisites*, documented in `references/installation.md`, never owned by a skill.
-- Skills assume JSON is the universal default for every `dikw client` command, so `--format json` is never added (pass `--format table` only for human output) — use `--plain` when piping, probe `dikw client health` before assuming reachability, and **not** to do final LLM answer synthesis with dikw-core (the agent composes answers from retrieved chunks/pages). Keep new skill content consistent with these defaults in `references/dikw-client-command-reference.md`.
+- Only `dikw client *` commands are in scope. Root commands (`dikw init`, `dikw serve`, `dikw auth`) are setup *prerequisites*, documented in `README.md`, never owned by a skill.
+- Skills assume JSON is the universal default for every `dikw client` command, so `--format json` is never added (pass `--format table` only for human output) — use `--plain` when piping, probe `dikw client health` before assuming reachability, and **not** to do final LLM answer synthesis with dikw-core (the agent composes answers from retrieved chunks/pages). Keep new skill content consistent with these defaults.

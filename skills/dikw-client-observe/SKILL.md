@@ -10,10 +10,11 @@ Use this skill for read-only attachment and diagnostics against a running
 
 ## Prerequisites
 
-Confirm `dikw-core` is installed (`pip install dikw-core`, or `pipx`/`uv tool`
-if you prefer an isolated tool) and the user has a running `dikw serve`. Root
-commands such as `dikw init`, `dikw serve`, and `dikw auth` are setup context,
-not this skill's owned command surface.
+Confirm `dikw-core` is installed (`pip install "dikw-core[cjk]"`, or
+`pipx`/`uv tool` if you prefer an isolated tool) and the user has a running
+`dikw serve`. Use the CJK extra by default for Chinese/CJK bases. Root commands
+such as `dikw init`, `dikw serve`, and `dikw auth` are setup context, not this
+skill's owned command surface.
 
 ## Command SOP
 

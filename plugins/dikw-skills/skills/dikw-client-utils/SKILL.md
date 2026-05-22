@@ -27,8 +27,10 @@ dikw client tasks status <task_id>
 with `--cursor` to walk a large queue page by page, or pass `--all` to collect
 every page at once. Filters (`--op`, `--status`) compose with the cursor.
 
-Task ids are 12-character hex identifiers. Async submit commands print a
-`task_id`, `status`, `events_url`, and `wait_command`.
+Task ids are opaque strings. Do not assume length, UUID shape, or hex-only
+encoding; always pass through the exact `task_id` returned by the server.
+Async submit commands print a `task_id`, `status`, `events_url`, and
+`wait_command`.
 
 ## Cursor Event SOP
 
@@ -83,6 +85,12 @@ dikw client serve-and-run --keep-alive --base ./my-base -- retrieve "question"
 
 Without `--keep-alive`, inner async operations are auto-forced to wait so the
 temporary server is not torn down before the task completes.
+
+Avoid `serve-and-run` when a machine must parse clean JSON from stdout. The
+temporary server and libraries may emit startup/status logs in the same stream
+as the inner command output. For strict JSON parsing, prefer attaching to an
+already-running `dikw serve` instance and call the relevant `dikw client ...`
+command directly.
 
 This skill documents the full async task contract inline above; the
 `task_id` / `next_from_seq` cursor shape and exit codes need no external file.

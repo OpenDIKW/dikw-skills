@@ -9,6 +9,21 @@ Use this skill for operations that refresh indexes, write generated knowledge,
 call configured LLM/provider legs, or approve/reject wisdom candidates. Confirm
 intent before applying fixes or approving/rejecting review items.
 
+## Async vs Blocking
+
+Long-running mutating commands default to async and print a JSON task handle.
+Prefer the async path when an agent can poll or resume later:
+
+```bash
+dikw client ingest
+dikw client synth
+dikw client lint propose --limit 10
+```
+
+Then use `dikw-client-utils` (`tasks events`, `tasks status`, `tasks wait`, or
+`tasks cancel`) to follow the task. Use `--wait --plain` only when the user
+expects this command invocation to block until a final report is available.
+
 ## Index Refresh
 
 Run ingest after users add or import sources:

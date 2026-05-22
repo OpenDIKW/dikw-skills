@@ -54,7 +54,7 @@ class SyncAndBuildTests(unittest.TestCase):
     def test_build_rejects_dangerous_output_directories(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo = Path(tmp) / "repo"
-            for name in ["skills", "plugins", "references", ".agents", "registry"]:
+            for name in ["skills", "plugins", ".agents", "registry"]:
                 shutil.copytree(ROOT / name, repo / name)
 
             for dangerous in [repo, repo / "src", repo / "skills", repo.parent]:

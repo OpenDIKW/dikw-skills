@@ -11,6 +11,10 @@ using retrieved chunks, pages, and graph context.
 
 ## Retrieval SOP
 
+Plan to compose the final answer in the agent. `dikw client retrieve` returns
+evidence (`chunks` and `page_refs`) only; it does not call an LLM or write the
+user-facing answer.
+
 Probe first if server state is unknown:
 
 ```bash

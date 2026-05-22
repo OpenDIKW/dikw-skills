@@ -87,7 +87,6 @@ def _safe_output_dir(root: Path, out_dir: Path) -> Path:
         root / "src",
         root / "skills",
         root / "plugins",
-        root / "references",
         root / "tests",
         root / ".agents",
         root / "registry",
