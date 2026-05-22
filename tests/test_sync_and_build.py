@@ -37,6 +37,7 @@ class SyncAndBuildTests(unittest.TestCase):
             with zipfile.ZipFile(out_dir / "plugins" / "dikw-skills-plugin.zip") as zf:
                 names = set(zf.namelist())
             self.assertIn("dikw-skills/.codex-plugin/plugin.json", names)
+            self.assertIn("dikw-skills/.claude-plugin/plugin.json", names)
             self.assertIn("dikw-skills/skills/dikw-client-retrieve/SKILL.md", names)
 
     def test_registry_archive_paths_resolve_to_built_skill_archives(self) -> None:

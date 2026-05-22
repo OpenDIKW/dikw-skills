@@ -7,7 +7,7 @@ All commands talk to a running `dikw serve` instance unless wrapped by
 
 - `--server`: server URL. Default is `DIKW_SERVER_URL` or `http://127.0.0.1:8765`.
 - `--token`: bearer token. Default is `DIKW_SERVER_TOKEN` or client config.
-- `--format json|table`: JSON is usually agent-facing; table is human-facing.
+- `--format json|table`: all commands default to JSON (agent-facing); pass `--format table` only for human-readable output.
 - `--plain`: disable rich progress/status output when piping command output.
 - `--wait`: block until an async task reaches a terminal status.
 
@@ -23,7 +23,7 @@ All commands talk to a running `dikw serve` instance unless wrapped by
 
 ## Agent defaults
 
-- Prefer JSON output for parseable results.
+- All `dikw client` commands default to JSON, so `--format json` is never required; add `--format table` only when a human will read the output.
 - Add `--plain` when a command streams or renders progress and stdout will be parsed.
-- Use `dikw client health --format json` before assuming the server is reachable.
+- Use `dikw client health` before assuming the server is reachable.
 - Do not perform final LLM answer synthesis with dikw-core. The agent composes an answer from retrieved chunks and pages.

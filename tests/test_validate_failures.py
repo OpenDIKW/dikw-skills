@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class ValidationFailureTests(unittest.TestCase):
     def _copy_repo(self) -> Path:
         tmp = Path(tempfile.mkdtemp())
-        for name in ["skills", "plugins", ".agents", "registry"]:
+        for name in ["skills", "plugins", ".agents", ".claude-plugin", "registry"]:
             src = ROOT / name
             if src.exists():
                 shutil.copytree(src, tmp / name)
@@ -35,6 +35,31 @@ class ValidationFailureTests(unittest.TestCase):
             skill.write_text("---\nname: wrong\n---\nbody\n", encoding="utf-8")
             result = validate_repo(tmp)
             self.assertTrue(any("description" in error for error in result.errors))
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_missing_claude_plugin_manifest_is_rejected(self) -> None:
+        tmp = self._copy_repo()
+        try:
+            (tmp / "plugins" / "dikw-skills" / ".claude-plugin" / "plugin.json").unlink()
+            result = validate_repo(tmp)
+            self.assertTrue(
+                any("claude-plugin manifest missing" in error for error in result.errors)
+            )
+        finally:
+            shutil.rmtree(tmp)
+
+    def test_missing_claude_plugin_marketplace_is_rejected(self) -> None:
+        tmp = self._copy_repo()
+        try:
+            (tmp / ".claude-plugin" / "marketplace.json").unlink()
+            result = validate_repo(tmp)
+            self.assertTrue(
+                any(
+                    "claude-plugin marketplace.json missing" in error
+                    for error in result.errors
+                )
+            )
         finally:
             shutil.rmtree(tmp)
 

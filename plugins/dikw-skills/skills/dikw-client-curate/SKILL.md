@@ -43,19 +43,22 @@ dikw client distill --batch 8 --wait --plain
 Review wisdom candidates:
 
 ```bash
-dikw client review list --format json
+dikw client review list
 dikw client review approve W-xxxxxx
+dikw client review approve W-xxxxxx --pretty   # colored human-readable line
 dikw client review reject W-xxxxxx
 ```
 
-Approve or reject only when the user has made the review decision clear.
+`review approve` / `review reject` print the raw `{item_id, new_status}` JSON on
+stdout by default (pipe straight to `jq`); pass `--pretty` for the colored human
+line. Approve or reject only when the user has made the review decision clear.
 
 ## Lint Governance
 
 Scan without applying changes:
 
 ```bash
-dikw client lint --format json
+dikw client lint
 ```
 
 Propose fixes:
@@ -63,7 +66,7 @@ Propose fixes:
 ```bash
 dikw client lint propose --limit 10 --wait --plain
 dikw client lint propose --rule broken_wikilink --wait --plain
-dikw client lint proposals --format json
+dikw client lint proposals
 ```
 
 Apply selected fixes only after inspecting proposals:
@@ -98,5 +101,5 @@ declared synth threshold gate.
   explicit user decision.
 - Mention possible provider/LLM/embedding cost before `synth`, `distill`,
   `eval --judge`, or `lint propose --enable-llm`.
-- Read `../../references/task-lifecycle.md` or use `dikw-client-utils` for
-  async task handles, waiting, events, cancellation, and exit codes.
+- For async task handles, waiting, events, cancellation, and exit codes, use
+  the `dikw-client-utils` skill.

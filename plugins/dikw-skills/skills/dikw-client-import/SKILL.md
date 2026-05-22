@@ -11,15 +11,24 @@ commands later to index them.
 
 ## Prerequisites
 
-Read `../../references/installation.md` when the CLI or converter availability
-is unclear. `dikw-core` must be installed from PyPI and provide `dikw`.
+`dikw-core` must be installed from PyPI and provide the `dikw` CLI
+(`pip install dikw-core`, or `pipx`/`uv tool` if you prefer an isolated tool).
 
-Install optional converters only when needed:
+Converters are plugins `dikw client` discovers **in-process**, so install them
+into the **same environment as `dikw-core`** — only when actually needed:
 
 ```bash
-uv tool install dikw-converter-mineru
-uv tool install dikw-converter-epub
+# Same venv as dikw-core:
+pip install dikw-converter-mineru     # engine "mineru": .pdf/.docx/.pptx/.xlsx
+pip install dikw-converter-epub       # engine "epub": .epub
+
+# If dikw-core is an isolated tool, inject into that env instead:
+uv tool install dikw-core --with dikw-converter-mineru   # uv
+pipx inject dikw-core dikw-converter-mineru              # pipx
 ```
+
+A bare `uv tool install dikw-converter-*` creates a separate isolated tool whose
+plugin `dikw client` cannot see — that is why it must share dikw-core's env.
 
 ## Import SOP
 
@@ -40,6 +49,9 @@ dikw client import ./book.epub --converter epub
 The importer pre-flights local files before uploading: frontmatter parse,
 non-empty body checks, asset existence checks, and package integrity. Local
 pre-flight failures exit before bytes are sent to the server.
+
+The committed / rejected summary prints as JSON by default; add `--format table`
+for the human-readable summary.
 
 ## After Import
 

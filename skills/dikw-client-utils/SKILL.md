@@ -10,13 +10,22 @@ not add unrelated DIKW commands here.
 
 ## Task Listing and Snapshots
 
-Inspect server-side tasks:
+`dikw client tasks list` returns a single cursor page as the server envelope
+`{tasks, next_cursor, has_more}`. Each row is a **summary** — it omits `result`
+and `error`, so read a task's full body or terminal payload through
+`dikw client tasks status <task_id>`, never from the list view.
 
 ```bash
-dikw client tasks list --format json
-dikw client tasks list --op ingest --status running --limit 20 --format json
+dikw client tasks list
+dikw client tasks list --op ingest --status running --limit 20
+dikw client tasks list --all                  # drain the cursor into a flat array
+dikw client tasks list --cursor <next_cursor> # resume from a prior page
 dikw client tasks status <task_id>
 ```
+
+`--limit` is the page size (default 100, max 1000), not a total cap; pair it
+with `--cursor` to walk a large queue page by page, or pass `--all` to collect
+every page at once. Filters (`--op`, `--status`) compose with the cursor.
 
 Task ids are 12-character hex identifiers. Async submit commands print a
 `task_id`, `status`, `events_url`, and `wait_command`.
@@ -75,4 +84,5 @@ dikw client serve-and-run --keep-alive --base ./my-base -- retrieve "question"
 Without `--keep-alive`, inner async operations are auto-forced to wait so the
 temporary server is not torn down before the task completes.
 
-Read `../../references/task-lifecycle.md` for the shared task contract.
+This skill documents the full async task contract inline above; the
+`task_id` / `next_from_seq` cursor shape and exit codes need no external file.

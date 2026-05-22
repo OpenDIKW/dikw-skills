@@ -1,0 +1,16 @@
+{
+  "name": "opendikw",
+  "owner": {
+    "name": "OpenDIKW",
+    "url": "https://github.com/OpenDIKW"
+  },
+  "plugins": [
+    {
+      "name": "dikw-skills",
+      "source": "./plugins/dikw-skills",
+      "description": "Use dikw client commands from agent workflows.",
+      "version": "0.1.0",
+      "category": "productivity"
+    }
+  ]
+}
