@@ -85,8 +85,14 @@ Propose fixes:
 ```bash
 dikw client lint propose --limit 10
 dikw client lint propose --rule broken_wikilink
+dikw client lint propose --rule missing_provenance
 dikw client lint proposals
 ```
+
+`missing_provenance` (added in dikw-core 0.2.6) is a deterministic fixer — like
+`broken_wikilink`, it reconciles a K-page frontmatter `sources:` against the
+actual provenance edges in storage without an LLM call, so `--enable-llm` is
+not needed.
 
 Apply selected fixes only after inspecting proposals:
 

@@ -19,6 +19,7 @@ class CatalogTests(unittest.TestCase):
             "pages list",
             "pages get",
             "pages links",
+            "pages provenance",
             "graph get",
             "assets get",
             "import",

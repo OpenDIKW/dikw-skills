@@ -1,10 +1,11 @@
 {
   "name": "dikw-skills",
-  "displayName": "DIKW Skills",
+  "displayName": "dikw-skills",
   "description": "Agent skills for using dikw client commands and SOP workflows.",
-  "version": "0.1.0",
+  "version": "0.2.6",
   "author": {
-    "name": "OpenDIKW contributors",
+    "name": "holo",
+    "email": "helebest@gmail.com",
     "url": "https://github.com/OpenDIKW"
   },
   "homepage": "https://github.com/OpenDIKW/dikw-skills",

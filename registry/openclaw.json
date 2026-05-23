@@ -1,6 +1,6 @@
 {
   "name": "dikw-skills",
-  "version": "0.1.0",
+  "version": "0.2.6",
   "plugin": "./plugins/dikw-skills",
   "skills": [
     "dikw-client-observe",
