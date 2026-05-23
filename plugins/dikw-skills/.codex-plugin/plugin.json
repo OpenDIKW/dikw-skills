@@ -1,10 +1,10 @@
 {
   "name": "dikw-skills",
-  "version": "0.1.0",
+  "version": "0.2.6",
   "description": "Agent skills for using dikw client commands and SOP workflows.",
   "author": {
-    "name": "OpenDIKW contributors",
-    "email": "opensource@opendikw.org",
+    "name": "holo",
+    "email": "helebest@gmail.com",
     "url": "https://github.com/OpenDIKW"
   },
   "homepage": "https://github.com/OpenDIKW/dikw-skills",
@@ -13,7 +13,7 @@
   "keywords": ["dikw", "agent-skills", "knowledge-base", "rag"],
   "skills": "./skills/",
   "interface": {
-    "displayName": "DIKW Skills",
+    "displayName": "dikw-skills",
     "shortDescription": "Use dikw client commands from agent workflows.",
     "longDescription": "Focused Agent Skills for observing, retrieving, importing, curating, and managing task utilities through dikw client.",
     "developerName": "OpenDIKW",

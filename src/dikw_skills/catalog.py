@@ -19,6 +19,7 @@ EXPECTED_SKILLS: dict[str, tuple[str, ...]] = {
         "pages list",
         "pages get",
         "pages links",
+        "pages provenance",
         "graph get",
         "assets get",
     ),

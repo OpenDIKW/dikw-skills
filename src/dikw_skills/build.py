@@ -53,7 +53,7 @@ def _write_registry(root: Path, out_dir: Path) -> list[Path]:
     ]
     payload = {
         "name": PLUGIN_NAME,
-        "version": "0.1.0",
+        "version": "0.2.6",
         "skills": entries,
     }
     paths = [

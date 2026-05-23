@@ -1,6 +1,6 @@
 {
   "name": "dikw-skills",
-  "version": "0.1.0",
+  "version": "0.2.6",
   "well_known": {
     "skills": "./dist/site/.well-known/skills/index.json",
     "agent_skills": "./dist/site/.well-known/agent-skills/index.json"

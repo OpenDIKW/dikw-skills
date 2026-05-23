@@ -9,7 +9,7 @@
       "name": "dikw-skills",
       "source": "./plugins/dikw-skills",
       "description": "Use dikw client commands from agent workflows.",
-      "version": "0.1.0",
+      "version": "0.2.6",
       "category": "productivity"
     }
   ]
