@@ -1,5 +1,7 @@
 # DIKW Skills
 
+[![CI](https://github.com/OpenDIKW/dikw-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenDIKW/dikw-skills/actions/workflows/ci.yml)
+
 Agent Skills and local plugin packaging for `dikw client *` workflows.
 
 This repository treats `skills/` as the canonical source and packages those
