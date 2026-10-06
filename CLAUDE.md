@@ -1,10 +1,11 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code in the `dikw-skills` repository.
 
 ## What this repo is
 
-This repo authors and packages **Agent Skills** that teach AI agents how to safely drive a running `dikw-core` client (`dikw client *` commands) for knowledge-base observation, retrieval, import, curation, and task workflows. It contains almost no runtime logic of its own — the bulk is Markdown skill content plus a small Python toolchain (`src/dikw_skills/`) that validates, syncs, and packages that content for multiple agent platforms (Codex, Claude Code, OpenClaw, Hermes).
+This repo writes and packages **Agent Skills** that teach AI agents to drive a running `dikw-core` safely through `dikw client *` commands: observation, retrieval, import, curation, and task workflows.
+It has almost no runtime logic. Most of it is Markdown skill content, plus a small Python toolchain (`src/dikw_skills/`) that validates, syncs, and packages that content for Codex, Claude Code, OpenClaw, and Hermes.
 
 `skills/` is the **canonical source of truth**. Everything else (the plugin wrapper, registry indexes, dist archives) is derived from it.
 
@@ -24,46 +25,91 @@ uv run dikw-skills-sync-plugin       # copies skills/ into plugins/dikw-skills/
 uv run python -m unittest tests.test_sync_and_build.SyncAndBuildTests.test_build_creates_expected_release_artifacts
 ```
 
-Without `uv`, set `PYTHONPATH=src` and invoke the modules with Python 3.12+ (e.g. `python -m dikw_skills.cli` is not wired; use the `*_main` entry points in `cli.py`).
+Without `uv`, set `PYTHONPATH=src` and call the modules with Python 3.12+. `python -m dikw_skills.cli` is not wired; use the `*_main` entry points in `cli.py`.
 
 ## Architecture
 
-The Python package in `src/dikw_skills/` is built around one central contract:
+The package in `src/dikw_skills/` is built around one central contract:
 
-- **`catalog.py`** — `EXPECTED_SKILLS` maps each skill name to the exact `dikw client` subcommands it owns. This is the single source of truth that every other module consults. Every command appears under exactly one skill (ownership is non-overlapping, enforced by `validate`).
-- **`validate.py`** — checks each `skills/<name>/SKILL.md` exists, has `name`/`description` frontmatter, and literally contains the string `dikw client <command>` for every command in its catalog entry; checks for duplicate command ownership; validates the Codex `plugin.json` and `.agents/plugins/marketplace.json` shapes; then folds in `check_sync`.
-- **`sync.py`** — `sync_plugin` mirrors `skills/` into `plugins/dikw-skills/`; `check_sync` does a byte-level comparison (`filecmp.cmp(shallow=False)`) and reports stale or missing copies. The plugin copies are generated artifacts — **never hand-edit `plugins/dikw-skills/skills/`**; edit the canonical sources and re-sync.
-- **`build.py`** — runs `sync_plugin` first, then produces per-skill zips, the plugin zip, two identical discovery indexes (`.well-known/skills/` and `.well-known/agent-skills/`), and a `checksums.txt`. `_safe_output_dir` refuses to build into the repo root, a parent, or any source directory — preserve this guard when changing build paths.
+- **`catalog.py`** — `EXPECTED_SKILLS` maps each skill name to the exact `dikw client` subcommands that it owns. Every other module reads it. Each command has exactly one owner; `validate` enforces this.
+- **`validate.py`** — checks that each `skills/<name>/SKILL.md` exists, has `name` / `description` frontmatter, and contains the literal string `dikw client <command>` for every command it owns. It also checks for duplicate ownership, validates the Codex `plugin.json` and `.agents/plugins/marketplace.json` shapes, and runs `check_sync`.
+- **`sync.py`** — `sync_plugin` mirrors `skills/` into `plugins/dikw-skills/`. `check_sync` compares bytes (`filecmp.cmp(shallow=False)`) and reports stale or missing copies.
+- **`build.py`** — runs `sync_plugin` first, then writes per-skill zips, the plugin zip, two identical discovery indexes (`.well-known/skills/` and `.well-known/agent-skills/`), and `checksums.txt`. `_safe_output_dir` refuses to build into the repo root, a parent, or any source directory. Keep this guard when you change build paths.
 
-Data flow: **edit `skills/` → `sync_plugin` mirrors to plugin wrapper → `build_dist` packages everything into `dist/`.** `validate` and `--check` exist to catch drift between these stages in CI.
+Data flow: **edit `skills/` → `sync_plugin` mirrors to the plugin wrapper → `build_dist` packages everything into `dist/`.** `validate` and `--check` catch drift between these stages in CI.
+
+**WARNING:** `plugins/dikw-skills/skills/` is generated. Never edit it by hand. Edit `skills/` and run `uv run dikw-skills-sync-plugin`.
 
 ### Skill content conventions
 
 Each skill lives in `skills/<name>/` with:
-- `SKILL.md` — YAML frontmatter (`name` must equal the directory name; `description` required) followed by the agent-facing SOP. Body must mention each owned `dikw client <command>` verbatim or validation fails.
-- `agents/openai.yaml` — Codex/OpenAI interface metadata (display name, default prompt).
 
-When **adding or renaming a skill or command**: update `EXPECTED_SKILLS` in `catalog.py`, the `SKILL.md`, then run `sync-plugin` and the full baseline. The expected-artifact set in `tests/test_sync_and_build.py` is hard-coded per skill — update it too.
+- `SKILL.md` — YAML frontmatter (`name` equals the directory name; `description` is required), then the agent-facing SOP. The body must contain each owned `dikw client <command>` verbatim, or validation fails.
+- `agents/openai.yaml` — Codex/OpenAI interface metadata (display name, short description, default prompt).
+
+When you **add or rename a skill or a command**:
+
+1. Update `EXPECTED_SKILLS` in `catalog.py`.
+2. Update the `SKILL.md` and its `agents/openai.yaml` (`short_description` must be 25–64 characters).
+3. Update the hard-coded sets in `tests/test_catalog.py`, `tests/test_import_and_utils_docs.py`, and the expected artifacts in `tests/test_sync_and_build.py`.
+4. Update the skill table in `README.md`.
+5. Run `sync-plugin` and the full baseline.
+
+### Version
+
+The package version appears in `pyproject.toml`, `uv.lock`, `build.PACKAGE_VERSION`, `.claude-plugin/marketplace.json`, both plugin manifests, and `registry/*.json`. Change all of them together. `tests/test_catalog.py` checks that they agree.
 
 ### Scope boundaries baked into the skills
 
-- Only `dikw client *` commands are in scope. Root commands (`dikw init`, `dikw serve`, `dikw auth`) are setup *prerequisites*, documented in `README.md`, never owned by a skill.
-- Skills assume data-returning `dikw client` commands default to JSON, so `--format json` is usually not added (pass `--format table` only for human output). Blocking/progress wrappers such as `tasks wait` and `serve-and-run` are exceptions: use `--plain` when piping and avoid `serve-and-run` for strict JSON parsing. Probe `dikw client health` before assuming reachability, and **do not** do final LLM answer synthesis with dikw-core (the agent composes answers from retrieved chunks/pages). Keep new skill content consistent with these defaults.
+- Only `dikw client *` commands are in scope. Root commands (`dikw init`, `dikw serve`, `dikw auth`) are setup prerequisites, documented in `README.md`. No skill owns them.
+- Data-returning `dikw client` commands default to JSON, so the skills do not add `--format json`. They use `--format table` only for human output.
+- Blocking and progress wrappers (`tasks wait`, `--wait`) are exceptions: use `--plain` when stdout is piped. Avoid `serve-and-run` when stdout must be strict JSON.
+- Probe `dikw client health` before you assume the server is reachable.
+- `dikw-core` never writes the final answer. The agent composes answers from retrieved chunks and pages.
 
-## Working conventions
+## Writing product skills
 
-These guidelines reduce common LLM coding mistakes; they bias toward caution over speed, so use judgment on trivial tasks.
+These skills run in other people's agents, on several platforms. Write them for that reader.
 
-### Think before coding
-**Don't assume, don't hide confusion, surface tradeoffs.** State assumptions explicitly and ask when uncertain. If a request has multiple plausible interpretations, present them rather than picking silently. If a simpler approach exists, say so — push back when warranted. If something is unclear, stop, name what's confusing, and ask before implementing.
+- **Frontmatter:** use only Agent Skills spec fields (`name`, `description`, and optionally `license`, `compatibility`, `metadata`, `allowed-tools`). Claude Code-only fields (`disable-model-invocation`, `context`, `paths`, …) break packaging for other platforms.
+- **Description:** put the main use case first, then the owned commands. A description must parse as YAML: do not put `: ` inside an unquoted value.
+- **Each SOP says when it is done.** End a workflow with a "Done when …" line: a state that the agent can check.
+- **Each mutating or token-costing command says when to stop and ask.** The agent must get an explicit user decision before it changes or deletes content, or spends tokens.
+- **Grounding:** a retrieval answer cites the page path of each claim, and marks each claim that the evidence does not support.
+- **Commands must match the current `dikw-core` CLI.** Check each command and flag against `dikw client <command> --help` from the `dikw-core` version you target.
+- **Write plainly:** short sentences, one instruction per sentence, the same word for the same thing.
 
-### Simplicity first
-**Write the minimum code that solves the problem; nothing speculative.** No features beyond what was asked, no abstractions for single-use code, no "flexibility" or "configurability" that wasn't requested, no error handling for impossible scenarios. If 200 lines could be 50, rewrite it. The architecture above is deliberately organised around one central contract (`catalog.py`) for this reason — keep new code in the same spirit, and ask whether a senior engineer would call it overcomplicated.
+## Working rules
 
-### Surgical changes
-**Touch only what you must; clean up only your own mess.** When editing existing code, don't "improve" adjacent code, comments, or formatting; don't refactor what isn't broken; match existing style even if you'd do it differently. If you notice unrelated dead code, mention it — don't delete it. Remove only the imports/variables/functions that *your* changes orphaned. Every changed line should trace directly to the user's request. (Concretely here: `plugins/dikw-skills/skills/` is generated by `sync.py` — edit the canonical `skills/` and re-sync; never hand-edit the plugin copies.)
+### Clarify before coding
 
-### Goal-driven execution
-**Define success criteria up front, then loop until verified.** Transform tasks into verifiable goals: "add validation" → write tests for invalid inputs, then make them pass; "fix the bug" → write a test that reproduces it, then make it pass; "refactor X" → tests pass before and after. For multi-step work, state a brief plan with a verify step per item. In this repo the verify step is the four-command baseline at the top of `## Commands` — running it green is the goal-driven exit condition. Strong criteria let the loop run independently; weak criteria ("make it work") force constant clarification.
+- State your assumptions.
+- If a request has more than one reading, show them. Do not pick one silently.
+- If a decision blocks you, ask one question with the AskUserQuestion tool. Put your recommended answer first.
+- If a simpler approach exists, say so before you write code.
 
-These conventions are working if diffs contain fewer unnecessary changes, fewer rewrites due to overcomplication, and clarifying questions arrive before implementation rather than after mistakes.
+### Keep the change small
+
+- Write the minimum code that solves the request. No speculative features, no single-use abstractions, no flexibility that nobody asked for, no error handling for impossible cases.
+- Keep new code organised around the one central contract (`catalog.py`).
+- Change only what the request needs. Match the existing style.
+- Report unrelated dead code. Do not delete it. Remove only what your change made unused.
+
+### Test first
+
+- Turn the request into a check: "add validation" → tests for invalid input; "fix the bug" → a failing test that reproduces it; "refactor X" → tests pass before and after.
+- The check for every change is the four-command baseline in `## Commands`. Green on all four is the finish condition.
+
+## Autonomy
+
+- When a step does not need my input, continue. Put status notes in the same message as your next action.
+- Stop and ask only when you cannot continue without my decision, or before a destructive action: delete data or files you did not create, force-push, or change anything outside this repository.
+- Do not end a turn with a summary that announces the next step but does not take it, or with an offer to continue "unless you prefer otherwise".
+
+## Finish line
+
+A change is done when the four-command baseline is green, the PR is merged, and local `main` is synced.
+
+## Report
+
+End every run with three headings: **需要你决定** (decisions you wait for; "无" if none), **改动** (what changed, with PR links), **发现** (what you found; mark each claim you could not confirm, and say where you looked).

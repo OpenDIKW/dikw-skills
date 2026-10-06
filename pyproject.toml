@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dikw-skills"
-version = "0.2.6"
+version = "0.3.0"
 description = "Agent skills and plugin packaging for dikw client workflows"
 readme = "README.md"
 requires-python = ">=3.12"

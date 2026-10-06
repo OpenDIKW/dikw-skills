@@ -2,7 +2,7 @@
   "name": "dikw-skills",
   "displayName": "dikw-skills",
   "description": "Agent skills for using dikw client commands and SOP workflows.",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "author": {
     "name": "holo",
     "email": "helebest@gmail.com",

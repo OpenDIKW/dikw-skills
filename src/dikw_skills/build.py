@@ -12,6 +12,10 @@ import zipfile
 from .catalog import EXPECTED_SKILLS, PLUGIN_DIR, PLUGIN_NAME
 from .sync import sync_plugin
 
+# Keep in step with pyproject.toml and the plugin / registry manifests
+# (tests/test_catalog.py checks that they agree).
+PACKAGE_VERSION = "0.3.0"
+
 
 @dataclass(frozen=True)
 class RegistryEntry:
@@ -53,7 +57,7 @@ def _write_registry(root: Path, out_dir: Path) -> list[Path]:
     ]
     payload = {
         "name": PLUGIN_NAME,
-        "version": "0.2.6",
+        "version": PACKAGE_VERSION,
         "skills": entries,
     }
     paths = [

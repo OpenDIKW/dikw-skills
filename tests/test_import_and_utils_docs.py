@@ -15,7 +15,7 @@ class SkillDocumentationTests(unittest.TestCase):
         self.assertIn("dikw-converter-epub", text)
         self.assertIn("dikw client import", text)
 
-    def test_curate_skill_owns_ingest_lint_review_and_eval(self) -> None:
+    def test_curate_skill_owns_ingest_lint_eval_delete_and_wisdom(self) -> None:
         text = (ROOT / "skills" / "dikw-client-curate" / "SKILL.md").read_text(
             encoding="utf-8"
         )
@@ -25,8 +25,9 @@ class SkillDocumentationTests(unittest.TestCase):
             "dikw client lint",
             "dikw client lint propose",
             "dikw client lint apply",
-            "dikw client review list",
             "dikw client eval",
+            "dikw client delete",
+            "dikw client wisdom write",
         ]:
             self.assertIn(command, text)
 
