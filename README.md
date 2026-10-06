@@ -39,7 +39,7 @@ from the canonical `skills/` directory and should not be maintained by hand.
 | `dikw-client-observe` | Inspect server/base/provider state with read-only client checks. |
 | `dikw-client-retrieve` | Retrieve chunks, read pages, walk graph links, and fetch assets. |
 | `dikw-client-import` | Pre-flight and import local source material, including converter-backed formats. |
-| `dikw-client-curate` | Refresh indexes, synthesize K-layer pages, distill/review W-layer items, lint, and eval. |
+| `dikw-client-curate` | Refresh indexes, synthesize K-layer pages, lint, eval, soft-delete documents, and write hand-authored W-layer pages. |
 | `dikw-client-utils` | Handle async task lifecycle and `serve-and-run` one-shot workflows. |
 
 ## Install in Claude Code

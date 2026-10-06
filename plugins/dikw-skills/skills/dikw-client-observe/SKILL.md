@@ -1,53 +1,50 @@
 ---
 name: dikw-client-observe
-description: Inspect a running dikw-core server using read-only `dikw client` commands. Use when an agent needs to attach to a DIKW base, confirm server health, inspect storage counts, verify provider connectivity, or collect status with `dikw client info`, `dikw client status`, `dikw client health`, or `dikw client check`.
+description: Inspect a running dikw-core server with read-only `dikw client` commands. Use when an agent attaches to a DIKW base, confirms server health, inspects storage counts, or verifies provider connectivity with `dikw client health`, `dikw client info`, `dikw client status`, or `dikw client check`.
 ---
 
 # DIKW Client Observe
 
-Use this skill for read-only attachment and diagnostics against a running
-`dikw serve` instance.
+Use this skill for read-only attach and diagnostics against a running `dikw serve` instance.
 
 ## Prerequisites
 
-Confirm `dikw-core` is installed (`pip install "dikw-core[cjk]"`, or
-`pipx`/`uv tool` if you prefer an isolated tool) and the user has a running
-`dikw serve`. Use the CJK extra by default for Chinese/CJK bases. Root commands
-such as `dikw init`, `dikw serve`, and `dikw auth` are setup context, not this
-skill's owned command surface.
+- `dikw-core` is installed (`pip install "dikw-core[cjk]"`, or `pipx` / `uv tool` for an isolated tool). Use the CJK extra by default for Chinese/CJK bases.
+- The user runs `dikw serve`.
+- Root commands such as `dikw init`, `dikw serve`, and `dikw auth` are setup context. This skill does not own them.
 
-## Command SOP
+## Attach SOP
 
-Start every new attach flow with:
+1. Probe first:
 
-```bash
-dikw client health
-```
+   ```bash
+   dikw client health
+   ```
 
-Use the response to identify `base_root`, `version`, `storage_engine`,
-`layer_counts`, and configured providers.
+   Read `base_root`, `version`, `storage_engine`, `layer_counts`, and the configured providers.
+   The response shows whether each provider key is present. It never shows the key.
+2. If `health` fails, stop. Report the server URL you used and the error. Do not guess the server state.
+   The URL comes from `--server`, else `$DIKW_SERVER_URL`, else `http://127.0.0.1:8765`.
+3. Use the other read-only commands as needed:
 
-Use these read-only commands:
+   ```bash
+   dikw client info
+   dikw client status
+   dikw client check
+   dikw client check --llm-only
+   dikw client check --embed-only
+   ```
 
-```bash
-dikw client info
-dikw client status
-dikw client health
-dikw client check
-dikw client check --llm-only
-dikw client check --embed-only
-```
+Done when you can state which base the server serves, its layer counts, and whether each provider leg passes.
 
-These commands default to JSON, so `--format json` is redundant. For humans,
-add `--format table` where supported.
+## Output
+
+- `health`, `status`, and `check` print JSON by default, so `--format json` is redundant. Add `--format table` for a human.
+- `info` prints JSON only.
 
 ## Interpretation
 
-- Treat `dikw client health` as the bootstrap probe.
-- Treat `dikw client status` as storage/count inspection.
-- Treat `dikw client check` as a provider connectivity gate.
-- `dikw client check` exits `0` only when requested provider legs pass; exits
-  `1` for failed probes and `2` for flag misuse.
-- Do not use observe commands to refresh indexes or mutate content. Use
-  `dikw-client-curate` for `ingest`, `lint apply`, `synth`, `distill`, or
-  review decisions.
+- `dikw client health` is the bootstrap probe.
+- `dikw client status` shows storage counts.
+- `dikw client check` is the provider connectivity gate. It exits `0` only when the requested provider legs pass, `1` when a probe fails, and `2` on flag misuse.
+- Observe commands never refresh indexes or change content. Use `dikw-client-curate` for `ingest`, `synth`, `lint apply`, `delete`, or `wisdom write`.

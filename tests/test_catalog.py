@@ -25,15 +25,13 @@ class CatalogTests(unittest.TestCase):
             "import",
             "ingest",
             "synth",
-            "distill",
             "eval",
             "lint",
             "lint propose",
             "lint proposals",
             "lint apply",
-            "review list",
-            "review approve",
-            "review reject",
+            "delete",
+            "wisdom write",
             "tasks list",
             "tasks status",
             "tasks events",
@@ -64,6 +62,34 @@ class CatalogTests(unittest.TestCase):
             text = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
             for command in commands:
                 self.assertIn(f"dikw client {command}", text)
+
+    def test_skills_do_not_cite_removed_commands_or_paths(self) -> None:
+        # dikw-core 0.4.0 renamed the K-layer tree wiki/ -> knowledge/; the W layer
+        # became hand-written (`wisdom write`), so `distill` and `review *` are gone.
+        removed = ["dikw client distill", "dikw client review", " wiki/", "`wiki/"]
+        for skill_name in EXPECTED_SKILLS:
+            text = (ROOT / "skills" / skill_name / "SKILL.md").read_text(encoding="utf-8")
+            for marker in removed:
+                self.assertNotIn(marker, text, f"{skill_name} cites {marker!r}")
+
+    def test_versions_are_consistent(self) -> None:
+        import json
+        import re
+
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        version = re.search(r'^version = "([^"]+)"', pyproject, re.M).group(1)
+        for rel in [
+            ".claude-plugin/marketplace.json",
+            "plugins/dikw-skills/.claude-plugin/plugin.json",
+            "plugins/dikw-skills/.codex-plugin/plugin.json",
+            "registry/hermes.json",
+            "registry/openclaw.json",
+        ]:
+            text = (ROOT / rel).read_text(encoding="utf-8")
+            self.assertIn(f'"version": "{version}"', text, rel)
+        from dikw_skills import build
+
+        self.assertEqual(build.PACKAGE_VERSION, version)
 
     def test_repo_validation_passes(self) -> None:
         result = validate_repo(ROOT)

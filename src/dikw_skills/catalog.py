@@ -27,15 +27,13 @@ EXPECTED_SKILLS: dict[str, tuple[str, ...]] = {
     "dikw-client-curate": (
         "ingest",
         "synth",
-        "distill",
         "eval",
         "lint",
         "lint propose",
         "lint proposals",
         "lint apply",
-        "review list",
-        "review approve",
-        "review reject",
+        "delete",
+        "wisdom write",
     ),
     "dikw-client-utils": (
         "tasks list",

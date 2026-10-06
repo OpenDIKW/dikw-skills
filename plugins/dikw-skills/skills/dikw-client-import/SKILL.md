@@ -5,18 +5,13 @@ description: Import local source material into a dikw-core base through `dikw cl
 
 # DIKW Client Import
 
-Use this skill to move local source material into the server-bound
-`<base>/sources/` tree. Import only stages source packages; run curation
-commands later to index them.
+Use this skill to move local source material into the server's `<base>/sources/` tree.
+Import only stages source packages. Run `ingest` afterwards to index them.
 
 ## Prerequisites
 
-`dikw-core` must be installed from PyPI and provide the `dikw` CLI. Install
-the CJK extra by default for Chinese/CJK bases (`pip install
-"dikw-core[cjk]"`, or `pipx`/`uv tool` if you prefer an isolated tool).
-
-Converters are plugins `dikw client` discovers **in-process**, so install them
-into the **same environment as `dikw-core`** — only when actually needed:
+- `dikw-core` is installed from PyPI and provides the `dikw` CLI. Install the CJK extra by default for Chinese/CJK bases (`pip install "dikw-core[cjk]"`, or `pipx` / `uv tool` for an isolated tool).
+- Converters are plugins that `dikw client` loads **in-process**. Install them into the **same environment as `dikw-core`**, and only when the user imports that format:
 
 ```bash
 # Same venv as dikw-core:
@@ -28,51 +23,48 @@ uv tool install "dikw-core[cjk]" --with dikw-converter-mineru   # uv
 pipx inject dikw-core dikw-converter-mineru              # pipx
 ```
 
-A bare `uv tool install dikw-converter-*` creates a separate isolated tool whose
-plugin `dikw client` cannot see — that is why it must share dikw-core's env.
+A bare `uv tool install dikw-converter-*` creates a separate isolated tool. `dikw client` cannot see its plugin.
 
 ## Import SOP
 
-Import Markdown files or directories:
+1. Import Markdown files or directories:
 
-```bash
-dikw client import ./inbox
-dikw client import ./note.md
-```
+   ```bash
+   dikw client import ./inbox
+   dikw client import ./note.md
+   ```
 
-Import converter-backed non-Markdown files:
+2. Import a non-Markdown file through an installed converter. The importer picks the converter by file extension. `--converter` overrides that choice for one call:
 
-```bash
-dikw client import ./paper.pdf --converter mineru
-dikw client import ./book.epub --converter epub
-```
+   ```bash
+   dikw client import ./paper.pdf --converter mineru
+   dikw client import ./book.epub --converter epub
+   ```
 
-The importer pre-flights local files before uploading: frontmatter parse,
-non-empty body checks, asset existence checks, and package integrity. Local
-pre-flight failures exit before bytes are sent to the server.
+3. Read the `committed` / `rejected` summary. It prints as JSON by default; add `--format table` for a human.
 
-The committed / rejected summary prints as JSON by default; add `--format table`
-for the human-readable summary.
+Done when every package is committed, or you have reported each rejected package with its reason.
 
-## After Import
+Each Markdown file becomes one package together with the assets (images, PDFs) that it embeds.
+The importer pre-flights the files locally before it uploads: front matter parse, asset existence, non-empty body, and no orphan asset.
+A local pre-flight failure exits before any bytes leave the machine.
 
-After successful import, use `dikw-client-curate` to refresh the searchable
-index. The agent-friendly default is async:
+## After import
+
+Import is not indexing. It commits well-formed packages into `sources/`; `ingest` chunks and optionally embeds them.
+Use `dikw-client-curate` to refresh the index. The agent-friendly default is async:
 
 ```bash
 dikw client ingest
 dikw client ingest --no-embed
 ```
 
-Capture the returned `task_id` and follow it with `dikw-client-utils`. Use
-`--wait --plain` only when the user asks for the ingest report in the current
-command. Do not treat import as indexing. It commits well-formed packages into
-`sources/`; `ingest` chunks and optionally embeds them.
+Capture the returned `task_id` and follow it with `dikw-client-utils`.
+Use `--wait --plain` only when the user wants the ingest report from this command.
 
-## Failure Handling
+## Failure handling
 
-- Exit `2` usually means local user input was invalid before upload.
-- A response with `rejected` packages means some packages failed server-side
-  validation or commit; report the rejected package ids and reasons.
-- Do not install converters speculatively. Install `dikw-converter-mineru` or
-  `dikw-converter-epub` only for formats the user actually imports.
+- Exit `2` usually means the local input was invalid before upload. Report the file and the pre-flight error.
+- `rejected` packages failed server-side validation or commit. Report each package id and its reason.
+- Do not install converters speculatively. Install `dikw-converter-mineru` or `dikw-converter-epub` only for formats the user actually imports.
+- `dikw client import` is different from `dikw auth import`, which loads OAuth credentials.
