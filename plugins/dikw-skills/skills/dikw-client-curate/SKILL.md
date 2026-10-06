@@ -14,7 +14,9 @@ Ask before you run one of these, unless the user already asked for exactly that 
 - `lint apply` — it changes K-layer pages.
 - `delete` — it removes a document from the index and moves its file to `<base>/trash/`.
 - `wisdom write` — it creates a W-layer page or **overwrites** an existing one.
-- A command that costs tokens: `synth`, `synth --judge`, `eval --judge`, `lint propose --enable-llm`. Tell the user that it calls the configured provider.
+- A command that costs tokens: `synth`, `synth --judge`, `lint propose --enable-llm`, and every `eval` run except `--eval retrieval`. Tell the user that it calls the configured provider.
+
+`eval` without `--eval` runs the modes that the dataset declares, and the packaged `mvp` dataset declares both `retrieval` and `synth`. A synth eval runs a real synth with the LLM, with or without `--judge`. Every eval run also calls the embedding provider.
 
 ## Async by default
 
@@ -37,7 +39,7 @@ dikw client ingest --strict --plain
 - `--no-embed` refreshes full-text search only, with no embedding API calls.
 - `--strict` fails the run when any file errors. It implies `--wait`.
 
-Run `ingest` after the user adds or imports sources.
+Run `ingest` after the user adds or imports sources, or when the user asks for it. Without `--no-embed` it calls the embedding provider.
 
 ## K-layer synthesis
 
@@ -89,16 +91,19 @@ dikw client lint apply <proposal_task_id> --skip 1
 ## Eval gates
 
 ```bash
-dikw client eval
-dikw client eval --dataset mvp --retrieval hybrid
 dikw client eval --dataset mvp --eval retrieval
+dikw client eval --dataset mvp --eval retrieval --retrieval all
 dikw client eval --dataset mvp --eval synth --judge --judge-sample auto
 dikw client eval --dataset mvp --eval retrieval --write-baseline baseline.json
 dikw client eval --dataset mvp --eval retrieval --against baseline.json
+dikw client eval --dataset mvp --eval synth --write-baseline synth.json --tolerance 0.05
 ```
 
 - The server reads the dataset. `--dataset` names a packaged dataset or a path on the server. Omit it to run every packaged dataset.
 - `--retrieval` takes `hybrid` (default), `bm25`, `vector`, or `all`.
+- The default output is NDJSON. Add `--pretty` for rich tables, and `--plain` to drop the progress widget when you parse it.
+- `--cache` takes `read_write` (default), `rebuild`, or `off` for the eval snapshot cache.
+- `--tolerance` sets the noise floor that `--write-baseline` records (default 0.02). Widen it for synth baselines, so LLM jitter does not trip the gate.
 - `--write-baseline` and `--against` turn a run into a regression gate. Each needs one `--dataset` and one `--eval` mode, and implies `--wait`.
 - `--judge` adds an LLM judge score to synth evals and costs tokens. `--judge-sample auto` judges a calibrated sample instead of every item.
 - Exit codes with `--wait`: `0` succeeded and the gate passed; `1` failed or the gate failed; `130` cancelled; `2` an `--eval synth` run with no declared gate.
@@ -113,7 +118,7 @@ dikw client delete sources/notes/draft.md
 - `delete` works on D, K, and W paths. It removes the index rows and moves the file to `<base>/trash/<layer>/...` with a `trashed:` audit block.
 - Links from other pages to the deleted page break. The next `dikw client lint` reports them as `broken_wikilink`; the delete report counts them in `inbound_broken`. Delete never rewrites another page.
 - A path that is not registered fails the task. Find registered paths with `dikw client pages list`.
-- To recover, move the file back. A source re-indexes on the next `ingest`. A K or W page re-indexes through `lint propose --rule untracked_file` and then `lint apply`.
+- To recover, move the file back. A source re-indexes on the next `ingest`. A K or W page re-indexes through `lint propose --rule untracked_file` and then `lint apply`. Or write the page again: `synth --all` for K, `wisdom write` for W.
 
 ## Write a W-layer page
 

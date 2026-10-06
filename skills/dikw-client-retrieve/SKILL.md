@@ -30,7 +30,7 @@ Done when each claim in your answer cites a retrieved path, or you have said wha
 ## Paths
 
 - D layer (sources): `sources/...`
-- K layer (generated knowledge): `knowledge/<category>/<slug>.md`. The default categories are `entity`, `concept`, and `note`; a base can declare its own.
+- K layer (generated knowledge): `knowledge/<category>/<slug>.md`. The default categories are `entity`, `concept`, and `note`. A base can declare its own, and a category path can have several levels (`knowledge/tech/ai/<slug>.md`).
 - W layer (hand-written wisdom): `wisdom/[<author>/]<slug>.md`
 
 ## Page and graph expansion

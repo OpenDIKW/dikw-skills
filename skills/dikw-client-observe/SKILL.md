@@ -47,4 +47,5 @@ Done when you can state which base the server serves, its layer counts, and whet
 - `dikw client health` is the bootstrap probe.
 - `dikw client status` shows storage counts.
 - `dikw client check` is the provider connectivity gate. It exits `0` only when the requested provider legs pass, `1` when a probe fails, and `2` on flag misuse.
+- `check` makes small live calls to the LLM and embedding providers, so it spends a few tokens.
 - Observe commands never refresh indexes or change content. Use `dikw-client-curate` for `ingest`, `synth`, `lint apply`, `delete`, or `wisdom write`.

@@ -27,6 +27,8 @@ A bare `uv tool install dikw-converter-*` creates a separate isolated tool. `dik
 
 ## Import SOP
 
+Import only what the user asked for. If the user named a directory but not the files, list the files it will import and confirm before you run it. Import writes into the server's `sources/` tree.
+
 1. Import Markdown files or directories:
 
    ```bash
@@ -65,6 +67,7 @@ Use `--wait --plain` only when the user wants the ingest report from this comman
 ## Failure handling
 
 - Exit `2` usually means the local input was invalid before upload. Report the file and the pre-flight error.
+- The command exits `1` when the server rejects any package. That is not a crash: read the `rejected` list.
 - `rejected` packages failed server-side validation or commit. Report each package id and its reason.
 - Do not install converters speculatively. Install `dikw-converter-mineru` or `dikw-converter-epub` only for formats the user actually imports.
 - `dikw client import` is different from `dikw auth import`, which loads OAuth credentials.

@@ -87,6 +87,8 @@ class CatalogTests(unittest.TestCase):
         ]:
             text = (ROOT / rel).read_text(encoding="utf-8")
             self.assertIn(f'"version": "{version}"', text, rel)
+        uv_lock = (ROOT / "uv.lock").read_text(encoding="utf-8")
+        self.assertIn(f'name = "dikw-skills"\nversion = "{version}"', uv_lock)
         from dikw_skills import build
 
         self.assertEqual(build.PACKAGE_VERSION, version)
