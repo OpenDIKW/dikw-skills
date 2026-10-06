@@ -41,6 +41,8 @@ dikw client ingest --strict --plain
 
 Run `ingest` after the user adds or imports sources, or when the user asks for it. Without `--no-embed` it calls the embedding provider.
 
+Done when the task succeeded. With `--strict`, no file errored.
+
 ## K-layer synthesis
 
 ```bash
@@ -88,6 +90,8 @@ dikw client lint apply <proposal_task_id> --pick 0,2
 dikw client lint apply <proposal_task_id> --skip 1
 ```
 
+Done when the apply task succeeded and a new `dikw client lint` scan no longer reports the fixed issues.
+
 ## Eval gates
 
 ```bash
@@ -108,6 +112,8 @@ dikw client eval --dataset mvp --eval synth --write-baseline synth.json --tolera
 - `--judge` adds an LLM judge score to synth evals and costs tokens. `--judge-sample auto` judges a calibrated sample instead of every item.
 - Exit codes with `--wait`: `0` succeeded and the gate passed; `1` failed or the gate failed; `130` cancelled; `2` an `--eval synth` run with no declared gate.
 
+Done when the eval task is terminal and you have reported its metrics and gate result.
+
 ## Delete a document
 
 ```bash
@@ -118,6 +124,7 @@ dikw client delete sources/notes/draft.md
 - `delete` works on D, K, and W paths. It removes the index rows and moves the file to `<base>/trash/<layer>/...` with a `trashed:` audit block.
 - Links from other pages to the deleted page break. The next `dikw client lint` reports them as `broken_wikilink`; the delete report counts them in `inbound_broken`. Delete never rewrites another page.
 - A path that is not registered fails the task. Find registered paths with `dikw client pages list`.
+- Done when the delete report shows `trashed_to` (or says that the file was already gone), and you have told the user about any `inbound_broken` links.
 - To recover, move the file back. A source re-indexes on the next `ingest`. A K or W page re-indexes through `lint propose --rule untracked_file` and then `lint apply`. Or write the page again: `synth --all` for K, `wisdom write` for W.
 
 ## Write a W-layer page
@@ -143,6 +150,8 @@ The W layer is hand-written. Write only content that the user wrote or approved.
 - `--status` takes `draft`, `published`, `favorite`, or `archived`.
 - Repeat `--tag` and `--source` for more than one. `--source` adds a provenance path.
 - `--no-embed` defers embedding to the next `ingest`.
+
+Done when the write report shows the page path. `dikw client pages get wisdom/...` then returns the new body.
 
 ## Safety rules
 

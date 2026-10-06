@@ -73,7 +73,6 @@ class CatalogTests(unittest.TestCase):
                 self.assertNotIn(marker, text, f"{skill_name} cites {marker!r}")
 
     def test_versions_are_consistent(self) -> None:
-        import json
         import re
 
         pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
@@ -104,7 +103,10 @@ class CatalogTests(unittest.TestCase):
 
             self.assertEqual(lines[0], "interface:")
             self.assertTrue(any(line.startswith('  display_name: "') for line in lines))
-            self.assertTrue(any(line.startswith('  short_description: "') for line in lines))
+            short = next(line for line in lines if line.startswith('  short_description: "'))
+            # Codex's agents/openai.yaml schema allows 25-64 characters.
+            text = short.split('"', 1)[1].rsplit('"', 1)[0]
+            self.assertTrue(25 <= len(text) <= 64, f"{skill_name}: {len(text)} chars")
             default_prompt = next(
                 line for line in lines if line.startswith('  default_prompt: "')
             )

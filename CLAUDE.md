@@ -50,9 +50,10 @@ Each skill lives in `skills/<name>/` with:
 When you **add or rename a skill or a command**:
 
 1. Update `EXPECTED_SKILLS` in `catalog.py`.
-2. Update the `SKILL.md`.
-3. Update the hard-coded sets in `tests/test_catalog.py` and the expected artifacts in `tests/test_sync_and_build.py`.
-4. Run `sync-plugin` and the full baseline.
+2. Update the `SKILL.md` and its `agents/openai.yaml` (`short_description` must be 25–64 characters).
+3. Update the hard-coded sets in `tests/test_catalog.py`, `tests/test_import_and_utils_docs.py`, and the expected artifacts in `tests/test_sync_and_build.py`.
+4. Update the skill table in `README.md`.
+5. Run `sync-plugin` and the full baseline.
 
 ### Version
 
